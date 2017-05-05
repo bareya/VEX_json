@@ -1,0 +1,32 @@
+{
+    "abc_caching_time": 530.7660000324249,
+    "abc_geo_count": 30,
+    "anim_end": 1123,
+    "anim_scene": "//zfs01/Projects/OATS/episodes/RAK00/WLD/RAK00-WLD-0390/ANM/work/maya/RAK00_WLD_RAK00-WLD-0390_Anm_animation1.v034.ma",
+    "anim_start": 1001,
+    "asset_name": "Klum",
+    "asset_scale": 1.1,
+    "asset_type": "Character",
+    "cache_by": 1.0,
+    "cache_end": 1126,
+    "cache_start": 998,
+    "comment": "cache for abc mouth sexual stuff",
+    "deforming_caching_time": 0.0559999942779541,
+    "deforming_geo_count": 30,
+    "namespace": "Klum_AnimRig",
+    "origin_offset": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "project": "RAK00",
+    "rig": "\\\\ZFS01\\Projects\\OATS\\assets\\Character\\Klum\\Rig\\publish\\maya\\Klum_RenderRig_RenderRig.v120.ma",
+    "sequence": "WLD",
+    "shot": "RAK00-WLD-0390",
+    "time": "Mon Feb 27 19:50:43 2017",
+    "transform_caching_time": 0.006999969482421875,
+    "transforms_count": 0,
+    "user": "alombardi",
+    "version_number": 4,
+    "xmesh_caching_time": 153.17499995231628
+}
