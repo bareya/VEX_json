@@ -12,6 +12,9 @@
 #include "VEX/VEX_VexOp.h"
 #include "VEX/VEX_PodTypes.h"
 
+#include "VEX_jsonmapkeys.h"
+#include "VEX_jsonvalue.h"
+
 //struct JSONFile
 //{
 //	JSONFile(const char* file)
@@ -85,8 +88,12 @@ static void json_Cleanup(void *initData)
 	}
 }
 
-void newVEXOp(void *data)
+PUB_SYM void newVEXOp(void *data)
 {
 	// int json(string json, string &errmsg, string &output, ...);
-	new VEX_VexOp("json@&IS&S+", json_Evaluate, VEX_ALL_CONTEXT, json_Init, json_Cleanup, VEX_OPTIMIZE_2, true);
+	//	0			1			2				3			4
+	new VEX_VexOp("json@&IS&S&S+", json_Evaluate, VEX_ALL_CONTEXT, json_Init, json_Cleanup, VEX_OPTIMIZE_2, true);
+
+	// returns an array of keys based on provided path to the map
+	new VEX_VexOp("jsonmapkeys@&IS&S&[S+", VEX_jsonmapkeys::evaluate, VEX_ALL_CONTEXT, VEX_jsonmapkeys::init, VEX_jsonmapkeys::cleanup, VEX_OPTIMIZE_2, true);
 }
