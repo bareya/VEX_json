@@ -1,9 +1,0 @@
-VEX_jsonvalue.cpp
-VEX_jsonvalue.h
-example.json
-VEX_utils.cpp
-VEX_utils.h
-VEX_jsonmapkeys.cpp
-VEX_jsonmapkeys.h
-VEX_json.cpp
-CMakeLists.txt
