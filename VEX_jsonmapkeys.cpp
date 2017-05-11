@@ -23,6 +23,7 @@ void VEX_jsonmapkeys::evaluate(int argc, VEX_VexOpArg argv[], void*)
 	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
 	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
 
+	// opens json file
 	UT_JSONValue jsonFile;
 	if(!jsonFile.loadFromFile(inFileValue))
 	{
@@ -53,7 +54,7 @@ void VEX_jsonmapkeys::evaluate(int argc, VEX_VexOpArg argv[], void*)
 		index++;
 	}
 
-	// output
+	// output string[]
 	if(value && value->getType() == UT_JSONValue::JSON_MAP)
 	{
 		auto keysArray = reinterpret_cast<UT_Array<const char *>*>(output->myArg);
