@@ -16,8 +16,8 @@
 struct VEX_VexOpArg;
 class UT_JSONValue;
 
-PRV_SYM void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
+void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
 
-PRV_SYM const UT_JSONValue* VEX_GetJSONMapValue(const UT_JSONValue& value, const VEX_VexOpArg& key);
+const UT_JSONValue* VEX_GetJSONMapValue(const UT_JSONValue& value, const VEX_VexOpArg& key);
 
 #endif // DEFS_H

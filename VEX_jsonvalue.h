@@ -5,9 +5,9 @@
 
 namespace VEX_jsonvalue
 {
-	PRV_SYM void* init();
-	PRV_SYM void evaluate(int, VEX_VexOpArg[], void*);
-	PRV_SYM void cleanup(void*);
+	void* init();
+	void evaluate(int, VEX_VexOpArg[], void*);
+	void cleanup(void*);
 };
 
 #endif // VEX_JSONVALUE_H
