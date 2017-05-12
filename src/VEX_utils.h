@@ -16,8 +16,19 @@
 struct VEX_VexOpArg;
 class UT_JSONValue;
 
+///
+/// \brief VEX_SetString
+///
 void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
 
-const UT_JSONValue* VEX_GetJSONMapValue(const UT_JSONValue& value, const VEX_VexOpArg& key);
+///
+/// \brief VEX_GetJSONValue Iterative
+///
+const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& value, const int& argc, const VEX_VexOpArg argv[], const int& firstIndex = 4);
+
+///
+/// \brief VEX_GetJSONMapValue
+///
+const UT_JSONValue* VEX_GetJSONMapValue(const UT_JSONValue& jsonValue, const VEX_VexOpArg& key);
 
 #endif // DEFS_H
