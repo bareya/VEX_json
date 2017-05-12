@@ -1,4 +1,4 @@
-# JSONVex
+# VEX_json
 
 _VEX functions to read json file._
 
