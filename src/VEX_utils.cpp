@@ -3,6 +3,36 @@
 #include "VEX/VEX_VexOp.h"
 #include "UT/UT_JSONValue.h"
 #include "UT/UT_JSONValueMap.h"
+#include "UT/UT_String.h"
+
+
+static VEX_JSONStorage vexJsonStorage;
+
+
+const UT_JSONValue* VEX_JSONStorage::getJSON(const UT_String& path)
+{
+	uint32 hash = path.hash();
+	tbb::concurrent_hash_map<uint32, std::unique_ptr<UT_JSONValue>>::accessor a;
+
+	if(!m_storage.find(a, hash))
+	{
+		std::unique_ptr<UT_JSONValue> json(new UT_JSONValue());
+		if(!json->loadFromFile(path))
+		{
+			json.reset(nullptr);
+		}
+
+		m_storage.emplace(a, hash, std::move(json));
+	}
+
+	return a->second.get();
+}
+
+
+VEX_JSONStorage* VEX_GetJSONStorage()
+{
+	return &vexJsonStorage;
+}
 
 
 void* VEX_SetString(VEX_VexOpArg& arg, const char *value)

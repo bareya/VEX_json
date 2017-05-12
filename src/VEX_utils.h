@@ -13,8 +13,27 @@
 #define VEX_STATUS_SUCCESS 1
 #define VEX_STATUS_WARNING 2
 
-struct VEX_VexOpArg;
+#include <memory>
+
+#include "SYS/SYS_Types.h"
+#include "UT/UT_ConcurrentHashMap.h"
+
+class UT_String;
 class UT_JSONValue;
+struct VEX_VexOpArg;
+
+struct VEX_JSONStorage
+{
+	const UT_JSONValue* getJSON(const UT_String& path);
+
+private:
+	UT_ConcurrentHashMap<uint32, std::unique_ptr<UT_JSONValue>> m_storage;
+};
+
+///
+/// \brief VEX_GetStorage
+///
+VEX_JSONStorage* VEX_GetJSONStorage();
 
 ///
 /// \brief VEX_SetString
@@ -30,5 +49,6 @@ const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& value, const int& argc,
 /// \brief VEX_GetJSONMapValue
 ///
 const UT_JSONValue* VEX_GetJSONMapValue(const UT_JSONValue& jsonValue, const VEX_VexOpArg& key);
+
 
 #endif // DEFS_H
