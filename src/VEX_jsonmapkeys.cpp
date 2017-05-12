@@ -9,11 +9,11 @@
 
 void* VEX_jsonmapkeys::init()
 {
-	return nullptr;
+	return VEX_GetJSONStorage();
 }
 
 
-void VEX_jsonmapkeys::evaluate(int argc, VEX_VexOpArg argv[], void*)
+void VEX_jsonmapkeys::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 {
 	VEX_VexOpArg* status = &argv[0];
 	VEX_VexOpArg* inFile = &argv[1];
@@ -23,16 +23,17 @@ void VEX_jsonmapkeys::evaluate(int argc, VEX_VexOpArg argv[], void*)
 	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
 	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
 
-	// opens json file
-	UT_JSONValue jsonFile;
-	if(!jsonFile.loadFromFile(inFileValue))
+	VEX_JSONStorage* storage = reinterpret_cast<VEX_JSONStorage*>(data);
+
+	const UT_JSONValue* jsonFile = storage->getJSON(inFileValue);
+	if(!jsonFile)
 	{
 		oerror->myArg = VEX_SetString(*oerror, "File not found");
 		*statusValue = VEX_STATUS_FAILURE;
 		return;
 	}
 
-	const UT_JSONValue* value = VEX_GetJSONValue(jsonFile, argc, argv);
+	const UT_JSONValue* value = VEX_GetJSONValue(*jsonFile, argc, argv);
 
 	// output string[]
 	if(value && value->getType() == UT_JSONValue::JSON_MAP)
