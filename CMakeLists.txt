@@ -11,7 +11,8 @@ add_definitions(-fvisibility=hidden)
 INCLUDE_DIRECTORIES($ENV{HFS}/toolkit/include)
 LINK_DIRECTORIES($ENV{HFS}/dsolib)
 
-add_library(${PROJECT_NAME} SHARED "VEX_json.cpp" "VEX_jsonmapkeys.cpp" "VEX_jsonvalue.cpp" "VEX_utils.cpp")
+file(GLOB SOURCES "src/*.cpp")
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} HoudiniUT HoudiniGEO)
 
