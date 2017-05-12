@@ -12,7 +12,7 @@ void* VEX_SetString(VEX_VexOpArg& arg, const char *value)
 }
 
 
-const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& jsonValue, const int& argc, const VEX_VexOpArg arg[], const int& firstIndex)
+const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& jsonValue, const int& argc, const VEX_VexOpArg argv[], const int& firstIndex)
 {
 	// begining value
 	const UT_JSONValue* value = &jsonValue;
@@ -20,7 +20,7 @@ const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& jsonValue, const int& a
 	int argIndex = firstIndex;
 	while(value && argIndex<argc)
 	{
-		VEX_VexOpArg* arg = argv[argIndex];
+		const VEX_VexOpArg& arg = argv[argIndex];
 		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
 		{
 			auto idValue = reinterpret_cast<VEXint*>(arg.myArg);

@@ -32,27 +32,7 @@ void VEX_jsonmapkeys::evaluate(int argc, VEX_VexOpArg argv[], void*)
 		return;
 	}
 
-	const UT_JSONValue* value = &jsonFile;
-
-	// iterate
-	int index = 4;
-	while(value && index<argc)
-	{
-		if(argv[index].myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
-		{
-			auto idValue = reinterpret_cast<VEXint*>(argv[index].myArg);
-			UT_JSONValueArray* array = value->getArray();
-			value = array->get(*idValue);
-		}
-		else if(argv[index].myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
-		{
-			auto keyValue = reinterpret_cast<const char*>(argv[index].myArg);
-			UT_JSONValueMap* map = value->getMap();
-			value = map->get(keyValue);
-		}
-
-		index++;
-	}
+	const UT_JSONValue* value = VEX_GetJSONValue(jsonFile, argc, argv);
 
 	// output string[]
 	if(value && value->getType() == UT_JSONValue::JSON_MAP)
