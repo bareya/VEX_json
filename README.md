@@ -6,7 +6,7 @@ This small set of VEX functions enables to bring data from JSON file to VEX.
  Compiled `DSO` place into `~/houdiniX.X/dso/vex` directory. In addition you need to add an entry to `~/houdiniX.X/vex/VEXdso`: `vex/lib.VEX_json.dso`, so VEX engine will be albe to load it.
  
  ### Compilation and dependencies
- I recommend to use CMake file distributed with the package.
+ I recommend to use CMake file distributed with the package to control symbols visibility.
  JSON parsing is based on `HDK`'s `UT_JSONValue` utility class and therefore compilation doesn't require any external dependencies.
 
 ### VEX Functions
@@ -16,10 +16,13 @@ int jsonvaluetype(string inputFile, string& outputError, string& output, ... );
 int jsonmapkeys(string inputFile, string& outputError, string& output[], ... );
 int jsonarraysize(string inputFile, string& outputError, int& output, ... );
  ```
- VEX functions can query strings that's why return value is a string or array of strings. In some cases reutrned value is an `int`.
+ VEX functions can query strings only, that's why returned value is a string or array of strings. In some cases, `jsonarraysize`, reutrned value is an `int`.
 
  Functions description:
-   * _jsonvalue_ - returns 
+   * `jsonvalue` - returns value at specified path
+   * `jsonvaluetype` - type at path: _bool_, _int_, _float_, _string_, _key_, _array_, _map_
+   * `jsonmapkeys` - keys of the map at path
+   * `jsonarraysize` - size of the array at path
  
  Arguments description:
   * `int` - return value: 0 - failure to get value, 1 - success
