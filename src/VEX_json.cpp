@@ -14,8 +14,8 @@ PUB_SYM void newVEXOp(void*)
 	new VEX_VexOp("jsonmapkeys@&IS&S&[S+",
 				VEX_jsonmapkeys::evaluate,
 				VEX_ALL_CONTEXT,
-				VEX_jsonmapkeys::init,
-				VEX_jsonmapkeys::cleanup,
+				VEX_InitJSONStorage,
+				VEX_CleanupJSONStorage,
 				VEX_OPTIMIZE_2,
 				true
 	);
@@ -23,8 +23,8 @@ PUB_SYM void newVEXOp(void*)
 	new VEX_VexOp("jsonvalue@&IS&S&S+",
 				VEX_jsonvalue::evaluate,
 				VEX_ALL_CONTEXT,
-				VEX_jsonvalue::init,
-				VEX_jsonvalue::cleanup,
+				VEX_InitJSONStorage,
+				VEX_CleanupJSONStorage,
 				VEX_OPTIMIZE_2,
 				true
 	);

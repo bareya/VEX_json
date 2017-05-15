@@ -6,12 +6,6 @@
 #include "UT/UT_JSONValueMap.h"
 
 
-void* VEX_jsonvalue::init()
-{
-	return VEX_GetJSONStorage();
-}
-
-
 void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 {
 	VEX_VexOpArg* status = &argv[0];
@@ -22,7 +16,7 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
 	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
 
-	VEX_JSONStorage* storage = reinterpret_cast<VEX_JSONStorage*>(data);
+	VEX_JSONInstanceStorage* storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
 
 	const UT_JSONValue* jsonFile = storage->getJSON(inFileValue);
 	if(!jsonFile)
@@ -45,10 +39,4 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 		oerror->myArg = VEX_SetString(*oerror, "Map hasn't been found.");
 		*statusValue = VEX_STATUS_FAILURE;
 	}
-
-}
-
-
-void VEX_jsonvalue::cleanup(void*)
-{
 }

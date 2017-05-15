@@ -11,29 +11,74 @@
 
 #define VEX_STATUS_FAILURE 0
 #define VEX_STATUS_SUCCESS 1
-#define VEX_STATUS_WARNING 2
 
 #include <memory>
 
 #include "SYS/SYS_Types.h"
 #include "UT/UT_ConcurrentHashMap.h"
 
+#include "UT/UT_JSONValue.h"
+
 class UT_String;
 class UT_JSONValue;
 struct VEX_VexOpArg;
 
-struct VEX_JSONStorage
+///
+/// \brief The VEX_JSONRefCounter struct
+///
+struct VEX_JSONValueRefCounter
 {
+	VEX_JSONValueRefCounter(std::unique_ptr<UT_JSONValue> ptr)
+		: m_count(0), m_value(std::move(ptr))
+	{
+	}
+
+	inline const UT_JSONValue* get() const
+	{
+		return m_value.get();
+	}
+
+	uint32 m_count;
+	std::unique_ptr<UT_JSONValue> m_value;
+};
+
+
+using VEX_JSONStorage = UT_ConcurrentHashMap<uint32, VEX_JSONValueRefCounter>;
+
+///
+/// \brief The VEX_JSONLocalStorage struct
+/// Stores data locally per function init.
+///
+struct VEX_JSONInstanceStorage
+{
+	static VEX_JSONInstanceStorage* create(VEX_JSONStorage* storage)
+	{
+		return new VEX_JSONInstanceStorage(storage);
+	}
+
+	~VEX_JSONInstanceStorage();
+
 	const UT_JSONValue* getJSON(const UT_String& path);
 
 private:
-	UT_ConcurrentHashMap<uint32, std::unique_ptr<UT_JSONValue>> m_storage;
+	VEX_JSONInstanceStorage(VEX_JSONStorage* storage);
+
+	VEX_JSONStorage* m_storage;
+
+	// some sort of set to store local queries
 };
 
 ///
-/// \brief VEX_GetStorage
+/// \brief VEX_InitJSONStorage
+/// VEX init function per function instance.
+/// Returned value is instance storage.
 ///
-VEX_JSONStorage* VEX_GetJSONStorage();
+void* VEX_InitJSONStorage();
+
+///
+/// \brief VEX_CleanupJSONStorage
+///
+void VEX_CleanupJSONStorage(void*);
 
 ///
 /// \brief VEX_SetString
@@ -44,11 +89,5 @@ void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
 /// \brief VEX_GetJSONValue Iterative
 ///
 const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& value, const int& argc, const VEX_VexOpArg argv[], const int& firstIndex = 4);
-
-///
-/// \brief VEX_GetJSONMapValue
-///
-const UT_JSONValue* VEX_GetJSONMapValue(const UT_JSONValue& jsonValue, const VEX_VexOpArg& key);
-
 
 #endif // DEFS_H

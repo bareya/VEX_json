@@ -6,35 +6,55 @@
 #include "UT/UT_String.h"
 
 
-static VEX_JSONStorage vexJsonStorage;
+// ***************************** VEX_JSONStorage ***************************** //
+static VEX_JSONStorage vexJsonStorageNew;
 
 
-const UT_JSONValue* VEX_JSONStorage::getJSON(const UT_String& path)
+// ***************************** VEX_JSONInstanceStorage ***************************** //
+VEX_JSONInstanceStorage::VEX_JSONInstanceStorage(VEX_JSONStorage* storage)
+	: m_storage(storage)
+{
+}
+
+
+VEX_JSONInstanceStorage::~VEX_JSONInstanceStorage()
+{
+	// iterate over local elements and decrease reference count
+}
+
+const UT_JSONValue* VEX_JSONInstanceStorage::getJSON(const UT_String& path)
 {
 	uint32 hash = path.hash();
-	tbb::concurrent_hash_map<uint32, std::unique_ptr<UT_JSONValue>>::accessor a;
+	VEX_JSONStorage::accessor a;
 
-	if(!m_storage.find(a, hash))
+	if(!m_storage->find(a, hash))
 	{
 		std::unique_ptr<UT_JSONValue> json(new UT_JSONValue());
 		if(!json->loadFromFile(path))
 		{
-			json.reset(nullptr);
+			json.reset(nullptr); // deleter will be invoked
 		}
 
-		m_storage.emplace(a, hash, std::move(json));
+		m_storage->emplace(a, hash, std::move(json));
 	}
 
 	return a->second.get();
 }
 
-
-VEX_JSONStorage* VEX_GetJSONStorage()
+// ***************************** INIT AND CLEAN FUNCTIONS ***************************** //
+void* VEX_InitJSONStorage()
 {
-	return &vexJsonStorage;
+	return VEX_JSONInstanceStorage::create(&vexJsonStorageNew);
 }
 
 
+void VEX_CleanupJSONStorage(void* data)
+{
+	delete reinterpret_cast<VEX_JSONInstanceStorage*>(data);
+}
+
+
+// ***************************** SETTERS AND GETTERS ***************************** //
 void* VEX_SetString(VEX_VexOpArg& arg, const char *value)
 {
 	VEX_VexOp::stringFree(reinterpret_cast<const char*>(arg.myArg));
@@ -68,19 +88,4 @@ const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& jsonValue, const int& a
 	}
 
 	return value;
-}
-
-
-const UT_JSONValue* VEX_GetJSONMapValue(const UT_JSONValue& value, const VEX_VexOpArg& key)
-{
-	const char* keyValue = reinterpret_cast<const char*>(key.myArg);
-
-	UT_JSONValueMap *map = value.getMap();
-	const UT_JSONValue* newValue = map->get(keyValue);
-	if(!newValue)
-	{
-		return nullptr;
-	}
-
-	return newValue;
 }

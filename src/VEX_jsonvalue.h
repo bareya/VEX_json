@@ -5,9 +5,7 @@
 
 namespace VEX_jsonvalue
 {
-	void* init();
 	void evaluate(int, VEX_VexOpArg[], void*);
-	void cleanup(void*);
 };
 
 #endif // VEX_JSONVALUE_H
