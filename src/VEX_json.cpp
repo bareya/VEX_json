@@ -5,6 +5,7 @@
 
 #include "VEX_jsonmapkeys.h"
 #include "VEX_jsonvalue.h"
+#include "VEX_jsonvaluetype.h"
 
 PUB_SYM void newVEXOp(void*)
 {
@@ -22,6 +23,15 @@ PUB_SYM void newVEXOp(void*)
 
 	new VEX_VexOp("jsonvalue@&IS&S&S+",
 				VEX_jsonvalue::evaluate,
+				VEX_ALL_CONTEXT,
+				VEX_InitJSONStorage,
+				VEX_CleanupJSONStorage,
+				VEX_OPTIMIZE_2,
+				true
+	);
+
+	new VEX_VexOp("jsonvaluetype@&IS&S&S+",
+				VEX_jsonvaluetype::evaluate,
 				VEX_ALL_CONTEXT,
 				VEX_InitJSONStorage,
 				VEX_CleanupJSONStorage,
