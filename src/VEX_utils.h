@@ -16,8 +16,9 @@
 
 #include "SYS/SYS_Types.h"
 #include "UT/UT_ConcurrentHashMap.h"
-
 #include "UT/UT_JSONValue.h"
+
+#include "tbb/concurrent_unordered_set.h"
 
 class UT_String;
 class UT_JSONValue;
@@ -60,12 +61,12 @@ struct VEX_JSONInstanceStorage
 
 	const UT_JSONValue* getJSON(const UT_String& path);
 
-private:
-	VEX_JSONInstanceStorage(VEX_JSONStorage* storage);
 
 	VEX_JSONStorage* m_storage;
+	tbb::concurrent_unordered_set<uint32> m_hashSet;
 
-	// some sort of set to store local queries
+private:
+	VEX_JSONInstanceStorage(VEX_JSONStorage* storage);
 };
 
 ///

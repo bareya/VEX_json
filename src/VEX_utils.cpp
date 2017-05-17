@@ -38,6 +38,12 @@ const UT_JSONValue* VEX_JSONInstanceStorage::getJSON(const UT_String& path)
 		m_storage->emplace(a, hash, std::move(json));
 	}
 
+	if(m_hashSet.count(hash) == 0)
+	{
+		m_hashSet.emplace(hash);
+		a->second.m_count++;
+	}
+
 	return a->second.get();
 }
 
@@ -50,7 +56,31 @@ void* VEX_InitJSONStorage()
 
 void VEX_CleanupJSONStorage(void* data)
 {
-	delete reinterpret_cast<VEX_JSONInstanceStorage*>(data);
+	// decrement local count
+	VEX_JSONInstanceStorage* instanceStorage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
+	{
+		VEX_JSONStorage::accessor a;
+		for(auto it = instanceStorage->m_hashSet.begin(); it!=instanceStorage->m_hashSet.end(); ++it)
+		{
+			if(instanceStorage->m_storage->find(a, *it) && a->second.m_count > 0)
+			{
+				a->second.m_count--;
+			}
+		}
+	}
+
+	// update storage map
+	for(auto it = instanceStorage->m_storage->begin(); it!=instanceStorage->m_storage->end(); ++it)
+	{
+		uint32 key = it->first;
+		if(it->second.m_count == 0)
+		{
+			instanceStorage->m_storage->erase(key);
+		}
+	}
+
+	// delete InstanceStorage
+	delete instanceStorage;
 }
 
 
