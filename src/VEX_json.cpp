@@ -21,6 +21,27 @@ PUB_SYM void newVEXOp(void*)
 				true
 	);
 
+	// jsonvalue int
+	new VEX_VexOp("jsonvalue@&IS&S&I+",
+				VEX_jsonvalue::evaluate,
+				VEX_ALL_CONTEXT,
+				VEX_InitJSONStorage,
+				VEX_CleanupJSONStorage,
+				VEX_OPTIMIZE_2,
+				true
+	);
+
+	// jsonvalue float
+	new VEX_VexOp("jsonvalue@&IS&S&F+",
+				VEX_jsonvalue::evaluate,
+				VEX_ALL_CONTEXT,
+				VEX_InitJSONStorage,
+				VEX_CleanupJSONStorage,
+				VEX_OPTIMIZE_2,
+				true
+	);
+
+	// jsonvalue string
 	new VEX_VexOp("jsonvalue@&IS&S&S+",
 				VEX_jsonvalue::evaluate,
 				VEX_ALL_CONTEXT,

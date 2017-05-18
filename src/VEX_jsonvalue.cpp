@@ -8,35 +8,46 @@
 
 void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 {
-	VEX_VexOpArg* status = &argv[0];
-	VEX_VexOpArg* inFile = &argv[1];
-	VEX_VexOpArg* oerror = &argv[2];
-	VEX_VexOpArg* output = &argv[3];
-
+	VEX_VexOpArg* status = &argv[0]; // output status
+	VEX_VexOpArg* oerror = &argv[2]; // output error message
+	VEX_VexOpArg* output = &argv[3]; // output value
 	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
-	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
-
-	VEX_JSONInstanceStorage* storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
-
-	const UT_JSONValue* jsonFile = storage->getJSON(inFileValue);
-	if(!jsonFile)
-	{
-		oerror->myArg = VEX_SetString(*oerror, "File not found");
-		*statusValue = VEX_STATUS_FAILURE;
-		return;
-	}
-
-	const UT_JSONValue* value = VEX_GetJSONValue(*jsonFile, argc, argv);
+	const UT_JSONValue* value = VEX_GetJSONValue2(argc, argv, data);
 
 	// output string
-	if(value && value->getType() == UT_JSONValue::JSON_STRING)
+	if(value)
 	{
-		output->myArg = VEX_SetString(*output, value->getS());
-		*statusValue = VEX_STATUS_SUCCESS;
+		if(value->getType() == UT_JSONValue::JSON_BOOL && output->myType == VEX_TYPE_INTEGER && !output->myArray)
+		{
+			VEXint* v = reinterpret_cast<VEXint*>(output->myArg);
+			*v = static_cast<VEXint>(value->getB());
+			*statusValue = VEX_STATUS_SUCCESS;
+		}
+		else if(value->getType() == UT_JSONValue::JSON_INT && output->myType == VEX_TYPE_INTEGER && !output->myArray)
+		{
+			VEXint* v = reinterpret_cast<VEXint*>(output->myArg);
+			*v = static_cast<VEXint>(value->getI());
+			*statusValue = VEX_STATUS_SUCCESS;
+		}
+		else if(value->getType() == UT_JSONValue::JSON_REAL && output->myType == VEX_TYPE_FLOAT && !output->myArray)
+		{
+			VEXfloat* v = reinterpret_cast<VEXfloat*>(output->myArg);
+			*v = static_cast<VEXfloat>(value->getF());
+			*statusValue = VEX_STATUS_SUCCESS;
+		}
+		else if(value->getType() == UT_JSONValue::JSON_STRING && output->myType == VEX_TYPE_STRING && !output->myArray)
+		{
+			output->myArg = VEX_SetString(*output, value->getS());
+			*statusValue = VEX_STATUS_SUCCESS;
+		}
+		else
+		{
+			oerror->myArg = VEX_SetString(*oerror, "Output value doesn't match JSON data type or reading value not supported.");
+			*statusValue = VEX_STATUS_FAILURE;
+		}
 	}
-	else
+	else // error
 	{
-		oerror->myArg = VEX_SetString(*oerror, "Map hasn't been found.");
 		*statusValue = VEX_STATUS_FAILURE;
 	}
 }

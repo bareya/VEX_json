@@ -99,4 +99,8 @@ void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
 ///
 const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& value, const int& argc, const VEX_VexOpArg argv[], const int& firstIndex = 4);
 
+
+
+const UT_JSONValue* VEX_GetJSONValue2(int argc, VEX_VexOpArg argv[], void* data);
+
 #endif // DEFS_H

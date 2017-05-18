@@ -149,3 +149,55 @@ const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& jsonValue, const int& a
 
 	return value;
 }
+
+
+const UT_JSONValue* VEX_GetJSONValue2(int argc, VEX_VexOpArg argv[], void* data)
+{
+	// map default values
+	VEX_VexOpArg* status = &argv[0]; // output status
+	VEX_VexOpArg* inFile = &argv[1]; // input json file
+	VEX_VexOpArg* oerror = &argv[2]; // output error message
+	// VEX_VexOpArg* output = &argv[3]; // not used output value
+
+	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
+	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
+
+	VEX_JSONInstanceStorage* storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
+	const UT_JSONValue* jsonCache = storage->getJSON(inFileValue);
+	if(!jsonCache)
+	{
+		oerror->myArg = VEX_SetString(*oerror, "File not found");
+		*statusValue = VEX_STATUS_FAILURE;
+		return nullptr;
+	}
+
+	const UT_JSONValue* value = jsonCache;
+
+	int argIndex = 4;
+	while(value && argIndex<argc)
+	{
+		const VEX_VexOpArg& arg = argv[argIndex];
+		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
+		{
+			auto idValue = reinterpret_cast<VEXint*>(arg.myArg);
+			UT_JSONValueArray* array = value->getArray();
+			value = array->get(*idValue);
+		}
+		else if(arg.myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
+		{
+			auto keyValue = reinterpret_cast<const char*>(arg.myArg);
+			UT_JSONValueMap* map = value->getMap();
+			value = map->get(keyValue);
+		}
+
+		argIndex++;
+	}
+
+	// error message if null
+	if(!value)
+	{
+		oerror->myArg = VEX_SetString(*oerror, "Value at given path has not been found.");
+	}
+
+	return value;
+}
