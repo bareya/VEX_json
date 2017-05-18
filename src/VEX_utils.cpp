@@ -10,32 +10,85 @@
 static VEX_JSONStorage vexJsonStorageNew;
 
 
+// ***************************** VEX_JSONValueRefCounter ***************************** //
+VEX_JSONValueRefCounter::VEX_JSONValueRefCounter(UT_JSONValue* value)
+	: m_count(0), m_value(value)
+{
+}
+
+
+VEX_JSONValueRefCounter::VEX_JSONValueRefCounter(VEX_JSONValueRefCounter&& other)
+	: m_count(other.m_count), m_value(std::move(other.m_value))
+{
+}
+
+
+VEX_JSONValueRefCounter::~VEX_JSONValueRefCounter()
+{
+}
+
+
+VEX_JSONValueRefCounter& VEX_JSONValueRefCounter::operator=(VEX_JSONValueRefCounter&& other)
+{
+	m_count = other.m_count;
+	m_value = std::move(other.m_value);
+	return *this;
+}
+
+
 // ***************************** VEX_JSONInstanceStorage ***************************** //
+VEX_JSONInstanceStorage* VEX_JSONInstanceStorage::create()
+{
+	return new VEX_JSONInstanceStorage(&vexJsonStorageNew);
+}
+
+
 VEX_JSONInstanceStorage::VEX_JSONInstanceStorage(VEX_JSONStorage* storage)
-	: m_storage(storage)
+	: m_gStorage(storage)
 {
 }
 
 
 VEX_JSONInstanceStorage::~VEX_JSONInstanceStorage()
 {
-	// iterate over local elements and decrease reference count
+	// decrement count based on local set
+	{
+		VEX_JSONStorage::accessor a;
+		for(auto it = m_hashSet.begin(); it!=m_hashSet.end(); ++it)
+		{
+			if(m_gStorage->find(a, *it) && a->second.m_count > 0)
+			{
+				a->second.m_count--;
+			}
+		}
+	}
+
+	// clean up zero count storage map
+	for(auto it = m_gStorage->begin(); it!=m_gStorage->end(); ++it)
+	{
+		uint32 key = it->first;
+		if(it->second.m_count == 0)
+		{
+			m_gStorage->erase(key);
+		}
+	}
 }
+
 
 const UT_JSONValue* VEX_JSONInstanceStorage::getJSON(const UT_String& path)
 {
 	uint32 hash = path.hash();
 	VEX_JSONStorage::accessor a;
 
-	if(!m_storage->find(a, hash))
+	if(!m_gStorage->find(a, hash))
 	{
-		std::unique_ptr<UT_JSONValue> json(new UT_JSONValue());
+		VEX_JSONValueRefCounter json(new UT_JSONValue());
 		if(!json->loadFromFile(path))
 		{
-			json.reset(nullptr); // deleter will be invoked
+			json.m_value.reset(nullptr); // deleter will be invoked
 		}
 
-		m_storage->emplace(a, hash, std::move(json));
+		m_gStorage->emplace(a, hash, std::move(json));
 	}
 
 	if(m_hashSet.count(hash) == 0)
@@ -44,43 +97,20 @@ const UT_JSONValue* VEX_JSONInstanceStorage::getJSON(const UT_String& path)
 		a->second.m_count++;
 	}
 
-	return a->second.get();
+	return a->second.m_value.get();
 }
+
 
 // ***************************** INIT AND CLEAN FUNCTIONS ***************************** //
 void* VEX_InitJSONStorage()
 {
-	return VEX_JSONInstanceStorage::create(&vexJsonStorageNew);
+	return VEX_JSONInstanceStorage::create();
 }
 
 
 void VEX_CleanupJSONStorage(void* data)
 {
-	// decrement local count
-	VEX_JSONInstanceStorage* instanceStorage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
-	{
-		VEX_JSONStorage::accessor a;
-		for(auto it = instanceStorage->m_hashSet.begin(); it!=instanceStorage->m_hashSet.end(); ++it)
-		{
-			if(instanceStorage->m_storage->find(a, *it) && a->second.m_count > 0)
-			{
-				a->second.m_count--;
-			}
-		}
-	}
-
-	// update storage map
-	for(auto it = instanceStorage->m_storage->begin(); it!=instanceStorage->m_storage->end(); ++it)
-	{
-		uint32 key = it->first;
-		if(it->second.m_count == 0)
-		{
-			instanceStorage->m_storage->erase(key);
-		}
-	}
-
-	// delete InstanceStorage
-	delete instanceStorage;
+	delete reinterpret_cast<VEX_JSONInstanceStorage*>(data);
 }
 
 

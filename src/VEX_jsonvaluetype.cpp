@@ -1,6 +1,7 @@
 #include "VEX_jsonvaluetype.h"
 
 #include "VEX/VEX_VexOp.h"
+#include "UT/UT_JSONValue.h"
 
 
 void VEX_jsonvaluetype::evaluate(int argc, VEX_VexOpArg argv[], void* data)
