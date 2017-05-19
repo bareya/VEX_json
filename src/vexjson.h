@@ -1,0 +1,8 @@
+#ifndef VEX_JSON_H
+#define VEX_JSON_H
+
+#define VEX_STATUS_FAILURE 0
+#define VEX_STATUS_SUCCESS 1
+#define VEX_STATUS_WARNING 2
+
+#endif//VEX_JSON_H

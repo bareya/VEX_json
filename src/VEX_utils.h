@@ -9,8 +9,7 @@
 	#define PUB_SYM
 #endif
 
-#define VEX_STATUS_FAILURE 0
-#define VEX_STATUS_SUCCESS 1
+#include "vexjson.h"
 
 #include <memory>
 
