@@ -1,5 +1,5 @@
-#ifndef DEFS_H
-#define DEFS_H
+#ifndef VEX_UTILS_H
+#define VEX_UTILS_H
 
 #ifdef __GNUC__
 	#define PRV_SYM __attribute__ ((visibility ("hidden")))
@@ -102,4 +102,5 @@ const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& value, const int& argc,
 
 const UT_JSONValue* VEX_GetJSONValue2(int argc, VEX_VexOpArg argv[], void* data);
 
-#endif // DEFS_H
+#endif // VEX_UTILS_H
+
