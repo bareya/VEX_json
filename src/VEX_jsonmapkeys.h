@@ -6,6 +6,6 @@
 namespace VEX_jsonmapkeys
 {
 	void evaluate(int, VEX_VexOpArg[], void*);
-};
+}
 
 #endif // VEX_JSONMAPKEYS_H

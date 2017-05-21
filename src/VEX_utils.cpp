@@ -22,6 +22,11 @@ VEX_JSONValueRefCounter::VEX_JSONValueRefCounter(VEX_JSONValueRefCounter&& other
 {
 }
 
+VEX_JSONValueRefCounter::VEX_JSONValueRefCounter(const VEX_JSONValueRefCounter& other)
+	: m_count(other.m_count), m_value(other.m_value)
+{
+}
+
 
 VEX_JSONValueRefCounter::~VEX_JSONValueRefCounter()
 {
@@ -85,15 +90,23 @@ const UT_JSONValue* VEX_JSONInstanceStorage::getJSON(const UT_String& path)
 		VEX_JSONValueRefCounter json(new UT_JSONValue());
 		if(!json->loadFromFile(path))
 		{
-			json.m_value.reset(nullptr); // deleter will be invoked
+			json.m_value = nullptr;
 		}
 
+#if SYS_VERSION_MAJOR_INT < 16
+		m_gStorage->insert(a, std::pair<uint32, VEX_JSONValueRefCounter>(hash, std::move(json)));
+#else
 		m_gStorage->emplace(a, hash, std::move(json));
+#endif
 	}
 
 	if(m_hashSet.count(hash) == 0)
 	{
+#if SYS_VERSION_MAJOR_INT < 16
+		m_hashSet.insert(hash);
+#else
 		m_hashSet.emplace(hash);
+#endif
 		a->second.m_count++;
 	}
 

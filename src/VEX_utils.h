@@ -14,8 +14,31 @@
 #include <memory>
 
 #include "SYS/SYS_Types.h"
+#include "SYS/SYS_Version.h"
 #include "UT/UT_ConcurrentHashMap.h"
 #include "tbb/concurrent_unordered_set.h"
+
+// Houdini 16 has definition of VEX_PodTypes, previous versions don't, it's taken from VEX/VEX_PodTypes.h
+#if SYS_VERSION_MAJOR_INT < 16
+	#include <VM/VM_Math.h>
+	#include <UT/UT_Vector2.h>
+	#include <UT/UT_Vector3.h>
+	#include <UT/UT_Vector4.h>
+	#include <UT/UT_Matrix2.h>
+	#include <UT/UT_Matrix3.h>
+	#include <UT/UT_Matrix4.h>
+
+	using VEXfloat = fpreal32;
+	using VEXint = int32;
+	using VEXuint = uint32;
+	using VEXvec2 = UT_Vector2;
+	using VEXvec3 = UT_Vector3;
+	using VEXvec4 = UT_Vector4;
+	using VEXmat2 = UT_Matrix2;
+	using VEXmat3 = UT_Matrix3;
+	using VEXmat4 = UT_Matrix4;
+	using VEXquaternion = UT_Quaternion;
+#endif
 
 class UT_String;
 class UT_JSONValue;
@@ -32,6 +55,9 @@ struct VEX_JSONInstanceStorage;
 struct VEX_JSONValueRefCounter
 {
 	VEX_JSONValueRefCounter(VEX_JSONValueRefCounter&& other);
+
+	// Copy constructor must be present for maps and sets
+	VEX_JSONValueRefCounter(const VEX_JSONValueRefCounter& other);
 	~VEX_JSONValueRefCounter();
 
 	VEX_JSONValueRefCounter& operator=(VEX_JSONValueRefCounter&& other);
@@ -43,11 +69,12 @@ struct VEX_JSONValueRefCounter
 	friend struct VEX_JSONInstanceStorage;
 private:
 	VEX_JSONValueRefCounter(UT_JSONValue* value);
-	VEX_JSONValueRefCounter(const VEX_JSONValueRefCounter&) = delete;
 	VEX_JSONValueRefCounter& operator=(const VEX_JSONValueRefCounter&) = delete;
 
 	uint32 m_count;
-	std::unique_ptr<UT_JSONValue> m_value;
+
+	// m_value must be shared because of copy constructor
+	std::shared_ptr<UT_JSONValue> m_value;
 };
 
 ///

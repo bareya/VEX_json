@@ -6,6 +6,6 @@
 namespace VEX_jsonvalue
 {
 	void evaluate(int, VEX_VexOpArg[], void*);
-};
+}
 
 #endif // VEX_JSONVALUE_H
