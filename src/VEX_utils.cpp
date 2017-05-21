@@ -22,6 +22,7 @@ VEX_JSONValueRefCounter::VEX_JSONValueRefCounter(VEX_JSONValueRefCounter&& other
 {
 }
 
+
 VEX_JSONValueRefCounter::VEX_JSONValueRefCounter(const VEX_JSONValueRefCounter& other)
 	: m_count(other.m_count), m_value(other.m_value)
 {
@@ -135,36 +136,7 @@ void* VEX_SetString(VEX_VexOpArg& arg, const char *value)
 }
 
 
-const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& jsonValue, const int& argc, const VEX_VexOpArg argv[], const int& firstIndex)
-{
-	// begining value
-	const UT_JSONValue* value = &jsonValue;
-
-	int argIndex = firstIndex;
-	while(value && argIndex<argc)
-	{
-		const VEX_VexOpArg& arg = argv[argIndex];
-		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
-		{
-			auto idValue = reinterpret_cast<VEXint*>(arg.myArg);
-			UT_JSONValueArray* array = value->getArray();
-			value = array->get(*idValue);
-		}
-		else if(arg.myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
-		{
-			auto keyValue = reinterpret_cast<const char*>(arg.myArg);
-			UT_JSONValueMap* map = value->getMap();
-			value = map->get(keyValue);
-		}
-
-		argIndex++;
-	}
-
-	return value;
-}
-
-
-const UT_JSONValue* VEX_GetJSONValue2(int argc, VEX_VexOpArg argv[], void* data)
+const UT_JSONValue* VEX_GetJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 {
 	// map default values
 	VEX_VexOpArg* status = &argv[0]; // output status

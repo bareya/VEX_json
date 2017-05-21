@@ -105,8 +105,7 @@ private:
 
 ///
 /// \brief VEX_InitJSONStorage
-/// VEX init function per function instance.
-/// Returned value is instance storage.
+/// VEX init function per function instance. Returned value is instance storage.
 ///
 void* VEX_InitJSONStorage();
 
@@ -121,13 +120,9 @@ void VEX_CleanupJSONStorage(void*);
 void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
 
 ///
-/// \brief VEX_GetJSONValue Iterative
+/// \brief VEX_GetJSONValue2
 ///
-const UT_JSONValue* VEX_GetJSONValue(const UT_JSONValue& value, const int& argc, const VEX_VexOpArg argv[], const int& firstIndex = 4);
-
-
-
-const UT_JSONValue* VEX_GetJSONValue2(int argc, VEX_VexOpArg argv[], void* data);
+const UT_JSONValue* VEX_GetJSONValue(int argc, VEX_VexOpArg argv[], void* data);
 
 #endif // VEX_UTILS_H
 
