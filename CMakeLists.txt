@@ -16,4 +16,4 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} HoudiniUT HoudiniGEO)
 
-install(TARGETS ${PROJECT_NAME} DESTINATION "~/houdini16.0/vex/")
+install(TARGETS ${PROJECT_NAME} DESTINATION "~/houdini$ENV{HOUDINI_MAJOR_RELEASE}.$ENV{HOUDINI_MINOR_RELEASE}/dso/vex/")
