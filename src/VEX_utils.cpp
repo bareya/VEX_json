@@ -136,7 +136,7 @@ void* VEX_SetString(VEX_VexOpArg& arg, const char *value)
 }
 
 
-const UT_JSONValue* VEX_GetJSONValue(int argc, VEX_VexOpArg argv[], void* data)
+const UT_JSONValue* VEX_FindJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 {
 	// map default values
 	VEX_VexOpArg* status = &argv[0]; // output status
@@ -151,8 +151,8 @@ const UT_JSONValue* VEX_GetJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 	const UT_JSONValue* jsonCache = storage->getJSON(inFileValue);
 	if(!jsonCache)
 	{
-		oerror->myArg = VEX_SetString(*oerror, "File not found");
 		*statusValue = VEX_STATUS_FAILURE;
+		oerror->myArg = VEX_SetString(*oerror, "File not found");
 		return nullptr;
 	}
 
@@ -174,6 +174,12 @@ const UT_JSONValue* VEX_GetJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 			UT_JSONValueMap* map = value->getMap();
 			value = map->get(keyValue);
 		}
+		else
+		{
+			*statusValue = VEX_STATUS_FAILURE;
+			oerror->myArg = VEX_SetString(*oerror, "JSON path has not been found.");
+			return nullptr;
+		}
 
 		argIndex++;
 	}
@@ -185,4 +191,69 @@ const UT_JSONValue* VEX_GetJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 	}
 
 	return value;
+}
+
+
+//
+const char* VEX_jsonTypeAsString(const UT_JSONValue* value)
+{
+	switch(value->getType())
+	{
+		case UT_JSONValue::JSON_NULL:
+		{
+			return "null";
+		}
+		case UT_JSONValue::JSON_BOOL:
+		{
+			return "bool";
+		}
+		case UT_JSONValue::JSON_INT:
+		{
+			return "int";
+		}
+		case UT_JSONValue::JSON_REAL:
+		{
+			return "float";
+		}
+		case UT_JSONValue::JSON_STRING:
+		{
+			return "string";
+		}
+		case UT_JSONValue::JSON_KEY:
+		{
+			return "key";
+		}
+		case UT_JSONValue::JSON_ARRAY:
+		{
+			return "array";
+		}
+		case UT_JSONValue::JSON_MAP:
+		{
+			return "map";
+		}
+		default:
+		{
+			return "unknown";
+		}
+	}
+}
+
+
+const char* VEX_vexTypeAsString(const VEX_VexOpArg* arg)
+{
+	switch(arg->myType)
+	{
+		case VEX_TYPE_INTEGER:
+		{
+			return "int";
+		}
+		case VEX_TYPE_FLOAT:
+		{
+			return "float";
+		}
+		case VEX_TYPE_STRING:
+		{
+			return "string";
+		}
+	}
 }

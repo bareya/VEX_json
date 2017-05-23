@@ -49,7 +49,8 @@ struct VEX_JSONInstanceStorage;
 
 ///
 /// \brief The VEX_JSONRefCounter struct
-/// Place holder for UT_JSONValue object. This class is designed to be moved around only, no copying is allowed.
+/// Place holder for UT_JSONValue object. This class is designed to be moved around only.
+/// Because of legacy of STL copy constructor must be implemented.
 /// Also internally it holds reference count. Referece counting is managed by VEX_JSONInstanceStorage.
 ///
 struct VEX_JSONValueRefCounter
@@ -122,7 +123,17 @@ void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
 ///
 /// \brief VEX_GetJSONValue2
 ///
-const UT_JSONValue* VEX_GetJSONValue(int argc, VEX_VexOpArg argv[], void* data);
+const UT_JSONValue* VEX_FindJSONValue(int argc, VEX_VexOpArg argv[], void* data);
+
+///
+/// \brief jsonTypeAsString
+///
+const char* VEX_jsonTypeAsString(const UT_JSONValue* value);
+
+///
+/// \brief vexTypeAsString
+///
+const char* VEX_vexTypeAsString(const VEX_VexOpArg* arg);
 
 #endif // VEX_UTILS_H
 

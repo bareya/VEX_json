@@ -10,54 +10,11 @@ void VEX_jsonvaluetype::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 	VEX_VexOpArg* oerror = &argv[2]; // output error message
 	VEX_VexOpArg* output = &argv[3]; // output value
 	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
-	const UT_JSONValue* value = VEX_GetJSONValue(argc, argv, data);
+	const UT_JSONValue* value = VEX_FindJSONValue(argc, argv, data);
 
 	if(value)
 	{
-		switch(value->getType())
-		{
-			case UT_JSONValue::JSON_NULL:
-			{
-				output->myArg = VEX_SetString(*output, "null");
-				break;
-			}
-			case UT_JSONValue::JSON_BOOL:
-			{
-				output->myArg = VEX_SetString(*output, "bool");
-				break;
-			}
-			case UT_JSONValue::JSON_INT:
-			{
-				output->myArg = VEX_SetString(*output, "int");
-				break;
-			}
-			case UT_JSONValue::JSON_REAL:
-			{
-				output->myArg = VEX_SetString(*output, "float");
-				break;
-			}
-			case UT_JSONValue::JSON_STRING:
-			{
-				output->myArg = VEX_SetString(*output, "string");
-				break;
-			}
-			case UT_JSONValue::JSON_KEY:
-			{
-				output->myArg = VEX_SetString(*output, "key");
-				break;
-			}
-			case UT_JSONValue::JSON_ARRAY:
-			{
-				output->myArg = VEX_SetString(*output, "array");
-				break;
-			}
-			case UT_JSONValue::JSON_MAP:
-			{
-				output->myArg = VEX_SetString(*output, "map");
-				break;
-			}
-		}
-
+		output->myArg = VEX_SetString(*output, VEX_jsonTypeAsString(value));
 		*statusValue = VEX_STATUS_SUCCESS;
 	}
 	else
