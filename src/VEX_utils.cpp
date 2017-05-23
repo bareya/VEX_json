@@ -81,9 +81,9 @@ VEX_JSONInstanceStorage::~VEX_JSONInstanceStorage()
 }
 
 
-const UT_JSONValue* VEX_JSONInstanceStorage::getJSON(const UT_String& path)
+const UT_JSONValue* VEX_JSONInstanceStorage::getJSON(const char* path)
 {
-	uint32 hash = path.hash();
+	uint32 hash = UT_String::hash(path);
 	VEX_JSONStorage::accessor a;
 
 	if(!m_gStorage->find(a, hash))
@@ -143,58 +143,6 @@ void* VEX_SetString(VEX_VexOpArg &arg, const std::string& value)
 }
 
 
-// ***************************** JSON FILE ITERATOR ***************************** //
-const UT_JSONValue* VEX_FindJSONValue(int argc, VEX_VexOpArg argv[], void* data)
-{
-	// map default values
-	VEX_VexOpArg* status = &argv[0]; // output status
-	VEX_VexOpArg* inFile = &argv[1]; // input json file
-	VEX_VexOpArg* oerror = &argv[2]; // output error message
-	// VEX_VexOpArg* output = &argv[3]; // not used output value
-
-	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
-	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
-
-	VEX_JSONInstanceStorage* storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
-	const UT_JSONValue* jsonCache = storage->getJSON(inFileValue);
-	if(!jsonCache)
-	{
-		*statusValue = VEX_STATUS_FAILURE;
-		oerror->myArg = VEX_SetString(*oerror, "File not found");
-		return nullptr;
-	}
-
-	const UT_JSONValue* value = jsonCache;
-
-	int argIndex = 4;
-	while(value && argIndex<argc)
-	{
-		const VEX_VexOpArg& arg = argv[argIndex];
-		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
-		{
-			auto idValue = reinterpret_cast<VEXint*>(arg.myArg);
-			value = value->getArray()->get(*idValue);
-		}
-		else if(arg.myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
-		{
-			auto keyValue = reinterpret_cast<const char*>(arg.myArg);
-			value = value->getMap()->get(keyValue);
-		}
-		else
-		{
-			*statusValue = VEX_STATUS_FAILURE;
-			oerror->myArg = VEX_SetString(*oerror, std::string("Can't access JSON type:") + VEX_jsonTypeAsString(value) + " using: " + VEX_vexTypeAsString(arg));
-			return nullptr;
-		}
-
-		argIndex++;
-	}
-
-	return value;
-}
-
-
-//
 const char* VEX_jsonTypeAsString(const UT_JSONValue* value)
 {
 	switch(value->getType())
@@ -254,6 +202,86 @@ const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg)
 		case VEX_TYPE_STRING:
 		{
 			return "string";
+		}
+	}
+}
+
+
+// ***************************** JSON FILE ITERATOR ***************************** //
+const UT_JSONValue* VEX_findJSONValue(int argc, VEX_VexOpArg argv[], void* data)
+{
+	// map default values
+	VEX_VexOpArg* status = &argv[0]; // output status
+	VEX_VexOpArg* inFile = &argv[1]; // input json file
+	VEX_VexOpArg* oerror = &argv[2]; // output error message
+	// VEX_VexOpArg* output = &argv[3]; // not used output value
+
+	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
+	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
+
+	VEX_JSONInstanceStorage* storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
+	const UT_JSONValue* jsonCache = storage->getJSON(inFileValue);
+	if(!jsonCache)
+	{
+		*statusValue = VEX_STATUS_FAILURE;
+		oerror->myArg = VEX_SetString(*oerror, "File not found");
+		return nullptr;
+	}
+
+	const UT_JSONValue* value = jsonCache;
+
+	int argIndex = 4;
+	while(value && argIndex<argc)
+	{
+		const VEX_VexOpArg& arg = argv[argIndex];
+		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
+		{
+			auto idValue = reinterpret_cast<VEXint*>(arg.myArg);
+			value = value->getArray()->get(*idValue);
+		}
+		else if(arg.myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
+		{
+			auto keyValue = reinterpret_cast<const char*>(arg.myArg);
+			value = value->getMap()->get(keyValue);
+		}
+		else
+		{
+			*statusValue = VEX_STATUS_FAILURE;
+			oerror->myArg = VEX_SetString(*oerror, std::string("Can't access JSON type: '") + VEX_jsonTypeAsString(value) + "' using: '" + VEX_vexTypeAsString(arg) + "'");
+			return nullptr;
+		}
+
+		argIndex++;
+	}
+
+	return value;
+}
+
+
+JSONDataType VEX_getJSONDataType(const UT_JSONValue* value)
+{
+	switch(value->getType())
+	{
+		case UT_JSONValue::JSON_BOOL:
+		case UT_JSONValue::JSON_INT:
+		case UT_JSONValue::JSON_REAL:
+		{
+			return JSONDataType::Numeric;
+		}
+		case UT_JSONValue::JSON_STRING:
+		case UT_JSONValue::JSON_KEY:
+		{
+			return JSONDataType::String;
+		}
+		case UT_JSONValue::JSON_ARRAY:
+		case UT_JSONValue::JSON_MAP:
+		{
+			return JSONDataType::Compound;
+		}
+		case UT_JSONValue::JSON_NULL:
+		default:
+		{
+			return JSONDataType::Unknown;
 		}
 	}
 }

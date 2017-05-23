@@ -8,29 +8,46 @@
 
 static int copyJSONValueToVex(const UT_JSONValue* value, VEX_VexOpArg* output)
 {
-	if(value->getType() == UT_JSONValue::JSON_BOOL && output->myType == VEX_TYPE_INTEGER)
-	{
-		VEXint* v = reinterpret_cast<VEXint*>(output->myArg);
-		*v = static_cast<VEXint>(value->getB());
+	JSONDataType dataType = VEX_getJSONDataType(value);
+
+	switch (dataType) {
+		case JSONDataType::Numeric:
+		{
+			// process numeric type
+		}
+		case JSONDataType::String:
+		{
+
+		}
+		default:
+		{
+			return VEX_STATUS_FAILURE;
+		}
 	}
-	else if(value->getType() == UT_JSONValue::JSON_INT && output->myType == VEX_TYPE_INTEGER)
-	{
-		VEXint* v = reinterpret_cast<VEXint*>(output->myArg);
-		*v = static_cast<VEXint>(value->getI());
-	}
-	else if(value->getType() == UT_JSONValue::JSON_REAL && output->myType == VEX_TYPE_FLOAT)
-	{
-		VEXfloat* v = reinterpret_cast<VEXfloat*>(output->myArg);
-		*v = static_cast<VEXfloat>(value->getF());
-	}
-	else if(value->getType() == UT_JSONValue::JSON_STRING && output->myType == VEX_TYPE_STRING)
-	{
-		output->myArg = VEX_SetString(*output, value->getS());
-	}
-	else
-	{
-		return VEX_STATUS_FAILURE;
-	}
+
+//	if(value->getType() == UT_JSONValue::JSON_BOOL && output->myType == VEX_TYPE_INTEGER)
+//	{
+//		VEXint* v = reinterpret_cast<VEXint*>(output->myArg);
+//		*v = static_cast<VEXint>(value->getB());
+//	}
+//	else if(value->getType() == UT_JSONValue::JSON_INT && output->myType == VEX_TYPE_INTEGER)
+//	{
+//		VEXint* v = reinterpret_cast<VEXint*>(output->myArg);
+//		*v = static_cast<VEXint>(value->getI());
+//	}
+//	else if(value->getType() == UT_JSONValue::JSON_REAL && output->myType == VEX_TYPE_FLOAT)
+//	{
+//		VEXfloat* v = reinterpret_cast<VEXfloat*>(output->myArg);
+//		*v = static_cast<VEXfloat>(value->getF());
+//	}
+//	else if(value->getType() == UT_JSONValue::JSON_STRING && output->myType == VEX_TYPE_STRING)
+//	{
+//		output->myArg = VEX_SetString(*output, value->getS());
+//	}
+//	else // Compound or Unknown types can't be returned.
+//	{
+//		return VEX_STATUS_FAILURE;
+//	}
 
 	return VEX_STATUS_SUCCESS;
 }
@@ -68,9 +85,10 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 	VEX_VexOpArg* oerror = &argv[2]; // output error message
 	VEX_VexOpArg* output = &argv[3]; // output value
 	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
-	const UT_JSONValue* value = VEX_FindJSONValue(argc, argv, data);
 
-	// output string
+	// search for value
+	const UT_JSONValue* value = VEX_findJSONValue(argc, argv, data);
+
 	if(value && !output->myArray) // output value
 	{
 		*statusValue = copyJSONValueToVex(value, output);
@@ -95,9 +113,8 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 
 		}
 	}
-	else // error
+	else // error thrown from VEX_findJSONValue
 	{
 		*statusValue = VEX_STATUS_FAILURE;
-		// get error message
 	}
 }

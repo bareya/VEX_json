@@ -16,10 +16,11 @@
 
 #include "SYS/SYS_Types.h"
 #include "SYS/SYS_Version.h"
+
 #include "UT/UT_ConcurrentHashMap.h"
 #include "tbb/concurrent_unordered_set.h"
 
-// Houdini 16 has definition of VEX_PodTypes, previous versions don't, it's taken from VEX/VEX_PodTypes.h
+// Taken from Houdini 16's VEX/VEX_PodTypes.h
 #if SYS_VERSION_MAJOR_INT < 16
 	#include <VM/VM_Math.h>
 	#include <UT/UT_Vector2.h>
@@ -50,70 +51,71 @@ struct VEX_JSONInstanceStorage;
 
 ///
 /// \brief The VEX_JSONRefCounter struct
+/// UT_JSONValue is a place holder for JSON data. As this document is written and as far as my knowledge goes
 /// Place holder for UT_JSONValue object. This class is designed to be moved around only.
 /// Because of legacy of STL copy constructor must be implemented.
 /// Also internally it holds reference count. Referece counting is managed by VEX_JSONInstanceStorage.
 ///
-struct VEX_JSONValueRefCounter
+struct VEX_JSONValueRefCounter final
 {
+	/// @{ move
 	VEX_JSONValueRefCounter(VEX_JSONValueRefCounter&& other);
+	VEX_JSONValueRefCounter& operator=(VEX_JSONValueRefCounter&& other);
+	/// @}
 
 	// Copy constructor must be present for maps and sets
 	VEX_JSONValueRefCounter(const VEX_JSONValueRefCounter& other);
+
 	~VEX_JSONValueRefCounter();
 
-	VEX_JSONValueRefCounter& operator=(VEX_JSONValueRefCounter&& other);
+	friend struct VEX_JSONInstanceStorage;
+
+private:
+	/// must be non const to provide load access
 	inline UT_JSONValue* operator->() const
 	{
 		return m_value.get();
 	}
 
-	friend struct VEX_JSONInstanceStorage;
-private:
-	VEX_JSONValueRefCounter(UT_JSONValue* value);
+	explicit VEX_JSONValueRefCounter(UT_JSONValue* value);
+
 	VEX_JSONValueRefCounter& operator=(const VEX_JSONValueRefCounter&) = delete;
 
-	uint32 m_count;
-
-	// m_value must be shared because of copy constructor
-	std::shared_ptr<UT_JSONValue> m_value;
+	uint32 m_count; // count usages of value
+	std::shared_ptr<UT_JSONValue> m_value; // m_value must be shared because of copy constructor
 };
 
-///
-/// \brief VEX_JSONStorage
-/// Global storage for all JSON files
-///
+/// Global storage type for all JSON files
 using VEX_JSONStorage = UT_ConcurrentHashMap<uint32, VEX_JSONValueRefCounter>;
 
-///
-/// \brief The VEX_JSONLocalStorage struct
 /// This class is designed to be passed between init, evaluate and clean VEX functions.
 /// It holds a pointer to JSON global storage.
-///
-struct VEX_JSONInstanceStorage
+struct VEX_JSONInstanceStorage final
 {
+	/// Instance of this class can't be created on stack.
 	static VEX_JSONInstanceStorage* create();
 	~VEX_JSONInstanceStorage();
 
-	const UT_JSONValue* getJSON(const UT_String& path);
+	const UT_JSONValue* getJSON(const char* path);
 
 	friend struct VEX_JSONValueRefCounter;
-private:
-	VEX_JSONInstanceStorage(VEX_JSONStorage* storage);
 
-	VEX_JSONStorage* m_gStorage;
+private:
+	explicit VEX_JSONInstanceStorage(VEX_JSONStorage* storage);
+
+	/// @{ noncopyable
+	VEX_JSONInstanceStorage(const VEX_JSONInstanceStorage&) = delete;
+	VEX_JSONInstanceStorage& operator=(const VEX_JSONInstanceStorage&) = delete;
+	/// @}
+
+	VEX_JSONStorage* m_gStorage; // pointer to global storage
 	tbb::concurrent_unordered_set<uint32> m_hashSet;
 };
 
 ///
-/// \brief VEX_InitJSONStorage
 /// VEX init function per function instance. Returned value is instance storage.
 ///
 void* VEX_InitJSONStorage();
-
-///
-/// \brief VEX_CleanupJSONStorage
-///
 void VEX_CleanupJSONStorage(void*);
 
 ///
@@ -123,19 +125,27 @@ void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
 void* VEX_SetString(VEX_VexOpArg &arg, const std::string& value);
 
 ///
-/// \brief VEX_GetJSONValue2
-///
-const UT_JSONValue* VEX_FindJSONValue(int argc, VEX_VexOpArg argv[], void* data);
-
-///
-/// \brief jsonTypeAsString
 ///
 const char* VEX_jsonTypeAsString(const UT_JSONValue* value);
+const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg);
 
 ///
-/// \brief vexTypeAsString
+/// \brief VEX_GetJSONValue2
 ///
-const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg);
+const UT_JSONValue* VEX_findJSONValue(int argc, VEX_VexOpArg argv[], void* data);
+
+///
+/// \brief The JSONDataType enum
+///
+enum class JSONDataType
+{
+	Numeric,
+	String,
+	Compound,
+	Unknown
+};
+
+JSONDataType VEX_getJSONDataType(const UT_JSONValue* value);
 
 #endif // VEX_UTILS_H
 
