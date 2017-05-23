@@ -136,6 +136,14 @@ void* VEX_SetString(VEX_VexOpArg& arg, const char *value)
 }
 
 
+void* VEX_SetString(VEX_VexOpArg &arg, const std::string& value)
+{
+	VEX_VexOp::stringFree(reinterpret_cast<const char*>(arg.myArg));
+	return reinterpret_cast<void*>(const_cast<char*>(VEX_VexOp::stringAlloc(value.c_str())));
+}
+
+
+// ***************************** JSON FILE ITERATOR ***************************** //
 const UT_JSONValue* VEX_FindJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 {
 	// map default values
@@ -165,29 +173,21 @@ const UT_JSONValue* VEX_FindJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
 		{
 			auto idValue = reinterpret_cast<VEXint*>(arg.myArg);
-			UT_JSONValueArray* array = value->getArray();
-			value = array->get(*idValue);
+			value = value->getArray()->get(*idValue);
 		}
 		else if(arg.myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
 		{
 			auto keyValue = reinterpret_cast<const char*>(arg.myArg);
-			UT_JSONValueMap* map = value->getMap();
-			value = map->get(keyValue);
+			value = value->getMap()->get(keyValue);
 		}
 		else
 		{
 			*statusValue = VEX_STATUS_FAILURE;
-			oerror->myArg = VEX_SetString(*oerror, "JSON path has not been found.");
+			oerror->myArg = VEX_SetString(*oerror, std::string("Can't access JSON type:") + VEX_jsonTypeAsString(value) + " using: " + VEX_vexTypeAsString(arg));
 			return nullptr;
 		}
 
 		argIndex++;
-	}
-
-	// error message if null
-	if(!value)
-	{
-		oerror->myArg = VEX_SetString(*oerror, "Value at given path has not been found.");
 	}
 
 	return value;
@@ -239,9 +239,9 @@ const char* VEX_jsonTypeAsString(const UT_JSONValue* value)
 }
 
 
-const char* VEX_vexTypeAsString(const VEX_VexOpArg* arg)
+const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg)
 {
-	switch(arg->myType)
+	switch(arg.myType)
 	{
 		case VEX_TYPE_INTEGER:
 		{

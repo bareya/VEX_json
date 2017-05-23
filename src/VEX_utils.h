@@ -12,6 +12,7 @@
 #include "vexjson.h"
 
 #include <memory>
+#include <string>
 
 #include "SYS/SYS_Types.h"
 #include "SYS/SYS_Version.h"
@@ -119,6 +120,7 @@ void VEX_CleanupJSONStorage(void*);
 /// \brief VEX_SetString
 ///
 void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
+void* VEX_SetString(VEX_VexOpArg &arg, const std::string& value);
 
 ///
 /// \brief VEX_GetJSONValue2
@@ -133,7 +135,7 @@ const char* VEX_jsonTypeAsString(const UT_JSONValue* value);
 ///
 /// \brief vexTypeAsString
 ///
-const char* VEX_vexTypeAsString(const VEX_VexOpArg* arg);
+const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg);
 
 #endif // VEX_UTILS_H
 
