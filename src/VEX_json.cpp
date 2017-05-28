@@ -6,7 +6,7 @@
 #include "VEX_jsonvalue.h"
 #include "VEX_jsonvaluetype.h"
 
-PUB_SYM void newVEXOp(void*)
+void newVEXOp(void*)
 {
 //	int json(string json, string &errmsg, string &output, ...);
 //	0			1			2				3			4
@@ -51,6 +51,7 @@ PUB_SYM void newVEXOp(void*)
 				true
 	);
 
+	// jsonvaluetype string
 	new VEX_VexOp("jsonvaluetype@&IS&S&S+",
 				VEX_jsonvaluetype::evaluate,
 				VEX_ALL_CONTEXT,

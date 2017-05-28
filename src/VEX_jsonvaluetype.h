@@ -1,7 +1,7 @@
 #ifndef VEX_JSONVALUETYPE_H
 #define VEX_JSONVALUETYPE_H
 
-#include "VEX_utils.h"
+#include "VEX_jsonutils.h"
 
 namespace VEX_jsonvaluetype
 {

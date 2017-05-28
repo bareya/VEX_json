@@ -1,7 +1,7 @@
 #ifndef VEX_JSONVALUE_H
 #define VEX_JSONVALUE_H
 
-#include "VEX_utils.h"
+#include "VEX_jsonutils.h"
 
 namespace VEX_jsonvalue
 {

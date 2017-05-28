@@ -1,4 +1,4 @@
-#include "VEX_utils.h"
+#include "VEX_jsonutils.h"
 
 #include "VEX/VEX_VexOp.h"
 #include "UT/UT_JSONValue.h"
@@ -143,6 +143,36 @@ void* VEX_SetString(VEX_VexOpArg &arg, const std::string& value)
 }
 
 
+JSONDataType VEX_getJSONDataType(const UT_JSONValue* value)
+{
+	switch(value->getType())
+	{
+		case UT_JSONValue::JSON_BOOL:
+		case UT_JSONValue::JSON_INT:
+		case UT_JSONValue::JSON_REAL:
+		{
+			return JSONDataType::Numeric;
+		}
+		case UT_JSONValue::JSON_STRING:
+		case UT_JSONValue::JSON_KEY:
+		{
+			return JSONDataType::String;
+		}
+		case UT_JSONValue::JSON_ARRAY:
+		case UT_JSONValue::JSON_MAP:
+		{
+			return JSONDataType::Compound;
+		}
+		case UT_JSONValue::JSON_NULL:
+		default:
+		{
+			return JSONDataType::Unknown;
+		}
+	}
+}
+
+
+// ***************************** STRING REPRESENTATION ***************************** //
 const char* VEX_jsonTypeAsString(const UT_JSONValue* value)
 {
 	switch(value->getType())
@@ -207,6 +237,15 @@ const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg)
 }
 
 
+const UT_JSONValue* VEX_getJSONFileHandle(int argc, VEX_VexOpArg argv[], void* data)
+{
+	VEX_VexOpArg* inFile = &argv[1];
+	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
+
+
+}
+
+
 // ***************************** JSON FILE ITERATOR ***************************** //
 const UT_JSONValue* VEX_findJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 {
@@ -223,7 +262,6 @@ const UT_JSONValue* VEX_findJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 	const UT_JSONValue* jsonCache = storage->getJSON(inFileValue);
 	if(!jsonCache)
 	{
-		*statusValue = VEX_STATUS_FAILURE;
 		oerror->myArg = VEX_SetString(*oerror, "File not found");
 		return nullptr;
 	}
@@ -234,21 +272,31 @@ const UT_JSONValue* VEX_findJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 	while(value && argIndex<argc)
 	{
 		const VEX_VexOpArg& arg = argv[argIndex];
+
 		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
 		{
-			auto idValue = reinterpret_cast<VEXint*>(arg.myArg);
-			value = value->getArray()->get(*idValue);
+			const UT_JSONValueArray* jsonArray = value->getArray();
+			VEXint* idValue = reinterpret_cast<VEXint*>(arg.myArg);
+
+			if(*idValue >= 0 || *idValue < jsonArray->entries())
+			{
+				value = value->getArray()->get(*idValue);
+			}
+			else
+			{
+				oerror->myArg = VEX_SetString(*oerror, "JSON index not found:");
+				value = nullptr;
+			}
 		}
 		else if(arg.myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
 		{
-			auto keyValue = reinterpret_cast<const char*>(arg.myArg);
+			const char* keyValue = reinterpret_cast<const char*>(arg.myArg);
 			value = value->getMap()->get(keyValue);
 		}
 		else
 		{
-			*statusValue = VEX_STATUS_FAILURE;
-			oerror->myArg = VEX_SetString(*oerror, std::string("Can't access JSON type: '") + VEX_jsonTypeAsString(value) + "' using: '" + VEX_vexTypeAsString(arg) + "'");
-			return nullptr;
+			oerror->myArg = VEX_SetString(*oerror, "JSON key not found:");
+			value = nullptr;
 		}
 
 		argIndex++;
@@ -258,30 +306,46 @@ const UT_JSONValue* VEX_findJSONValue(int argc, VEX_VexOpArg argv[], void* data)
 }
 
 
-JSONDataType VEX_getJSONDataType(const UT_JSONValue* value)
+const UT_JSONValue* VEX_findJSONValue(const UT_JSONValue* inputValue, int argc, VEX_VexOpArg argv[])
 {
-	switch(value->getType())
+	VEX_VexOpArg* oerror = &argv[2]; // output error message
+
+	const UT_JSONValue* value = inputValue;
+
+	int argIndex = 4;
+	while(value && argIndex<argc)
 	{
-		case UT_JSONValue::JSON_BOOL:
-		case UT_JSONValue::JSON_INT:
-		case UT_JSONValue::JSON_REAL:
+		const VEX_VexOpArg& arg = argv[argIndex];
+
+		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
 		{
-			return JSONDataType::Numeric;
+			const UT_JSONValueArray* jsonArray = value->getArray();
+			VEXint* idValue = reinterpret_cast<VEXint*>(arg.myArg);
+
+			// data range check
+			if(*idValue >= 0 || *idValue < jsonArray->entries())
+			{
+				value = value->getArray()->get(*idValue);
+			}
+			else
+			{
+				oerror->myArg = VEX_SetString(*oerror, "JSON index out of range.");
+				value = nullptr;
+			}
 		}
-		case UT_JSONValue::JSON_STRING:
-		case UT_JSONValue::JSON_KEY:
+		else if(arg.myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
 		{
-			return JSONDataType::String;
+			const char* keyValue = reinterpret_cast<const char*>(arg.myArg);
+			value = value->getMap()->get(keyValue);
 		}
-		case UT_JSONValue::JSON_ARRAY:
-		case UT_JSONValue::JSON_MAP:
+		else
 		{
-			return JSONDataType::Compound;
+			oerror->myArg = VEX_SetString(*oerror, "JSON entry not found.");
+			value = nullptr;
 		}
-		case UT_JSONValue::JSON_NULL:
-		default:
-		{
-			return JSONDataType::Unknown;
-		}
+
+		argIndex++;
 	}
+
+	return value;
 }
