@@ -11,45 +11,24 @@ void newVEXOp(void*)
 //	int json(string json, string &errmsg, string &output, ...);
 //	0			1			2				3			4
 //	returns an array of keys based on provided path to the map
-	// jsonvalue int
-	new VEX_VexOp("jsonvalue@&IS&S&I+",
-				VEX_jsonvalue::evaluate,
-				VEX_ALL_CONTEXT,
-				VEX_InitJSONStorage,
-				VEX_CleanupJSONStorage,
-				VEX_OPTIMIZE_2,
-				true
-	);
 
-	// jsonvalue float
-	new VEX_VexOp("jsonvalue@&IS&S&F+",
-				VEX_jsonvalue::evaluate,
-				VEX_ALL_CONTEXT,
-				VEX_InitJSONStorage,
-				VEX_CleanupJSONStorage,
-				VEX_OPTIMIZE_2,
-				true
-	);
+	std::vector<UT_StringHolder> value_defs =
+	{
+		"jsonvalue@&IS&S&I+", "jsonvalue@&IS&S&[I+",
+		"jsonvalue@&IS&S&F+", "jsonvalue@&IS&S&[F+",
+	};
 
-	// jsonvalue string
-	new VEX_VexOp("jsonvalue@&IS&S&S+",
-				VEX_jsonvalue::evaluate,
-				VEX_ALL_CONTEXT,
-				VEX_InitJSONStorage,
-				VEX_CleanupJSONStorage,
-				VEX_OPTIMIZE_2,
-				true
-	);
-
-	// jsonvalue string array
-	new VEX_VexOp("jsonvalue@&IS&S&[S+",
-				VEX_jsonvalue::evaluate,
-				VEX_ALL_CONTEXT,
-				VEX_InitJSONStorage,
-				VEX_CleanupJSONStorage,
-				VEX_OPTIMIZE_2,
-				true
-	);
+	for(auto it=value_defs.begin(); it!=value_defs.end(); ++it)
+	{
+		new VEX_VexOp(*it,
+					VEX_jsonvalue::evaluate,
+					VEX_ALL_CONTEXT,
+					VEX_InitJSONStorage,
+					VEX_CleanupJSONStorage,
+					VEX_OPTIMIZE_2,
+					true
+		);
+	}
 
 	// jsonvaluetype string
 	new VEX_VexOp("jsonvaluetype@&IS&S&S+",
