@@ -3,7 +3,6 @@
 
 #include "VEX_convert.h"
 
-#include "VEX/VEX_VexOp.h"
 #include "UT/UT_JSONValue.h"
 #include "UT/UT_JSONValueArray.h"
 
@@ -18,6 +17,19 @@ template<typename T,typename F,bool=true> struct json_to_vex_same
 			return from.import(*reinterpret_cast<UT_ValArray<T>*>(to.myArg));
 		}
 	}
+
+	/// generic data import
+	static bool import(VEX_VexOpArg& to, const UT_JSONValue& from)
+	{
+		F fromValue;
+		std::cout << fromValue << std::endl;
+		if(from.import(fromValue)){
+			T* toValue = reinterpret_cast<T*>(to.myArg);
+			to_vex_value<T,F>::copy(toValue, fromValue);
+			return true;
+		}
+		return false;
+	}
 };
 
 // T and F are different types, data has to be casted and copied to storage type.
@@ -26,22 +38,22 @@ template<typename T,typename F> struct json_to_vex_same<T,F,false>
 	static bool copy(VEX_VexOpArg& to, const UT_JSONValue& from)
 	{
 		if(!to.myArray){
-			return json_to_vex_same<T,F,false>::import(to, from);
+			return json_to_vex_same<T,F,true>::import(to, from);
 		}else{
-			return json_to_vex_same<UT_ValArray<T>,UT_ValArray<F>,false>::import(to, from);
+			return json_to_vex_same<UT_ValArray<T>,UT_ValArray<F>,true>::import(to, from);
 		}
 	}
+};
 
-	/// generic data import
-	static bool import(VEX_VexOpArg& to, const UT_JSONValue& from)
+template<> struct json_to_vex_same<const char*,UT_StringHolder,false>
+{
+	static bool copy(VEX_VexOpArg& to, const UT_JSONValue& from)
 	{
-		F fromValue;
-		if(from.import(fromValue)){
-			T* toValue = reinterpret_cast<T*>(to.myArg);
-			to_vex_value<T,F>::copy(*toValue, fromValue);
-			return true;
+		if(!to.myArray){
+			return json_to_vex_same<const char,UT_StringHolder>::import(to, from);
+		}else{
+			return json_to_vex_same<UT_ValArray<const char*>,UT_StringArray,true>::import(to, from);
 		}
-		return false;
 	}
 };
 

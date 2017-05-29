@@ -16,6 +16,7 @@ void newVEXOp(void*)
 	{
 		"jsonvalue@&IS&S&I+", "jsonvalue@&IS&S&[I+",
 		"jsonvalue@&IS&S&F+", "jsonvalue@&IS&S&[F+",
+		"jsonvalue@&IS&S&S+", "jsonvalue@&IS&S&[S+",
 	};
 
 	for(auto it=value_defs.begin(); it!=value_defs.end(); ++it)

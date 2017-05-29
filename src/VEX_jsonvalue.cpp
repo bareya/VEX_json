@@ -46,7 +46,7 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 		{
 			*statusValue = json_to_vex<VEXint,int64>::copy(*output, *value);
 			if(!*statusValue){
-				oerror->myArg = VEX_SetString(*oerror, "Importing value failed");
+				oerror->myArg = VEX_SetString(*oerror, "Importing int value failed");
 			}
 			return;
 		}
@@ -54,12 +54,16 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 		{
 			*statusValue = json_to_vex<VEXfloat,fpreal64>::copy(*output, *value);
 			if(!*statusValue){
-				oerror->myArg = VEX_SetString(*oerror, "Importing value failed");
+				oerror->myArg = VEX_SetString(*oerror, "Importing float value failed");
 			}
 			return;
 		}
 		case VEX_TYPE_STRING:
 		{
+			*statusValue = json_to_vex<const char*,UT_StringHolder>::copy(*output, *value);
+			if(!*statusValue){
+				oerror->myArg = VEX_SetString(*oerror, "Importing string value failed");
+			}
 			return;
 		}
 		default:
