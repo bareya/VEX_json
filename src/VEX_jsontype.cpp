@@ -1,10 +1,10 @@
-#include "VEX_jsonvaluetype.h"
+#include "VEX_jsontype.h"
 
 #include "VEX/VEX_VexOp.h"
 #include "UT/UT_JSONValue.h"
 
 
-void VEX_jsonvaluetype::evaluate(int argc, VEX_VexOpArg argv[], void* data)
+void VEX_jsontype::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 {
 	VEX_VexOpArg* status = &argv[0]; // output status
 	VEX_VexOpArg* oerror = &argv[2]; // output error message

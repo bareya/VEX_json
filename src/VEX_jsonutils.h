@@ -99,17 +99,6 @@ void VEX_CleanupJSONStorage(void*);
 void* VEX_SetString(VEX_VexOpArg& arg, const char *value);
 void* VEX_SetString(VEX_VexOpArg& arg, const std::string& value);
 
-/// Type of data in JSONValue, UT_JSONValue performs conversion.
-enum class JSONDataType
-{
-	Numeric,
-	String,
-	Compound,
-	Unknown
-};
-
-JSONDataType VEX_getJSONDataType(const UT_JSONValue* value);
-
 /// Returns string representation of JSON or VEX value
 const char* VEX_jsonTypeAsString(const UT_JSONValue* value);
 const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg);

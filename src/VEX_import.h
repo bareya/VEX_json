@@ -45,6 +45,7 @@ template<typename T,typename F> struct json_to_vex_same<T,F,false>
 	}
 };
 
+// String conversion requiures full specialization
 template<> struct json_to_vex_same<const char*,UT_StringHolder,false>
 {
 	static bool copy(VEX_VexOpArg& to, const UT_JSONValue& from)

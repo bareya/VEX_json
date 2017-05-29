@@ -143,35 +143,6 @@ void* VEX_SetString(VEX_VexOpArg &arg, const std::string& value)
 }
 
 
-JSONDataType VEX_getJSONDataType(const UT_JSONValue* value)
-{
-	switch(value->getType())
-	{
-		case UT_JSONValue::JSON_BOOL:
-		case UT_JSONValue::JSON_INT:
-		case UT_JSONValue::JSON_REAL:
-		{
-			return JSONDataType::Numeric;
-		}
-		case UT_JSONValue::JSON_STRING:
-		case UT_JSONValue::JSON_KEY:
-		{
-			return JSONDataType::String;
-		}
-		case UT_JSONValue::JSON_ARRAY:
-		case UT_JSONValue::JSON_MAP:
-		{
-			return JSONDataType::Compound;
-		}
-		case UT_JSONValue::JSON_NULL:
-		default:
-		{
-			return JSONDataType::Unknown;
-		}
-	}
-}
-
-
 // ***************************** STRING REPRESENTATION ***************************** //
 const char* VEX_jsonTypeAsString(const UT_JSONValue* value)
 {
@@ -234,15 +205,6 @@ const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg)
 			return "string";
 		}
 	}
-}
-
-
-const UT_JSONValue* VEX_getJSONFileHandle(int argc, VEX_VexOpArg argv[], void* data)
-{
-	VEX_VexOpArg* inFile = &argv[1];
-	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
-
-
 }
 
 
