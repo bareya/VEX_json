@@ -22,7 +22,6 @@ template<typename T,typename F,bool=true> struct json_to_vex_same
 	static bool import(VEX_VexOpArg& to, const UT_JSONValue& from)
 	{
 		F fromValue;
-		std::cout << fromValue << std::endl;
 		if(from.import(fromValue)){
 			T* toValue = reinterpret_cast<T*>(to.myArg);
 			to_vex_value<T,F>::copy(toValue, fromValue);
