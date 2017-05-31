@@ -209,65 +209,6 @@ const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg)
 
 
 // ***************************** JSON FILE ITERATOR ***************************** //
-const UT_JSONValue* VEX_findJSONValue(int argc, VEX_VexOpArg argv[], void* data)
-{
-	// map default values
-	VEX_VexOpArg* status = &argv[0]; // output status
-	VEX_VexOpArg* inFile = &argv[1]; // input json file
-	VEX_VexOpArg* oerror = &argv[2]; // output error message
-	// VEX_VexOpArg* output = &argv[3]; // not used output value
-
-	auto statusValue = reinterpret_cast<VEXint*>(status->myArg);
-	auto inFileValue = reinterpret_cast<const char*>(inFile->myArg);
-
-	VEX_JSONInstanceStorage* storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
-	const UT_JSONValue* jsonCache = storage->getJSON(inFileValue);
-	if(!jsonCache)
-	{
-		oerror->myArg = VEX_SetString(*oerror, "File not found");
-		return nullptr;
-	}
-
-	const UT_JSONValue* value = jsonCache;
-
-	int argIndex = 4;
-	while(value && argIndex<argc)
-	{
-		const VEX_VexOpArg& arg = argv[argIndex];
-
-		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
-		{
-			const UT_JSONValueArray* jsonArray = value->getArray();
-			VEXint* idValue = reinterpret_cast<VEXint*>(arg.myArg);
-
-			if(*idValue >= 0 || *idValue < jsonArray->entries())
-			{
-				value = value->getArray()->get(*idValue);
-			}
-			else
-			{
-				oerror->myArg = VEX_SetString(*oerror, "JSON index not found:");
-				value = nullptr;
-			}
-		}
-		else if(arg.myType == VEX_TYPE_STRING && value->getType() == UT_JSONValue::JSON_MAP)
-		{
-			const char* keyValue = reinterpret_cast<const char*>(arg.myArg);
-			value = value->getMap()->get(keyValue);
-		}
-		else
-		{
-			oerror->myArg = VEX_SetString(*oerror, "JSON key not found:");
-			value = nullptr;
-		}
-
-		argIndex++;
-	}
-
-	return value;
-}
-
-
 const UT_JSONValue* VEX_findJSONValue(const UT_JSONValue* inputValue, int argc, VEX_VexOpArg argv[])
 {
 	VEX_VexOpArg* oerror = &argv[2]; // output error message
