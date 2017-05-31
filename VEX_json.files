@@ -1,3 +1,15 @@
+src/VEX_convert.h
+src/VEX_import.h
+src/VEX_json.cpp
+src/VEX_jsonkeys.cpp
+src/VEX_jsonkeys.h
+src/VEX_jsontype.cpp
+src/VEX_jsontype.h
+src/VEX_jsonutils.cpp
+src/VEX_jsonutils.h
+src/VEX_jsonvalue.cpp
+src/VEX_jsonvalue.h
+src/json.h
 CMakeLists.txt
 README.md
 src/VEX_json.cpp
