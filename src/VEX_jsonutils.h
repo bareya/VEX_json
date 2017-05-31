@@ -103,7 +103,6 @@ const char* VEX_jsonTypeAsString(const UT_JSONValue* value);
 const char* VEX_vexTypeAsString(const VEX_VexOpArg& arg);
 
 /// Search for value, returns nullptr if fails to find the value at given path
-const UT_JSONValue* VEX_findJSONValue(int argc, VEX_VexOpArg argv[], void* data);
 const UT_JSONValue* VEX_findJSONValue(const UT_JSONValue* inputValue, int argc, VEX_VexOpArg argv[]);
 
 #endif//VEX_JSONUTILS_H
