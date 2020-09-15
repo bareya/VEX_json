@@ -11,7 +11,7 @@ void VEX_jsontype::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 	VEX_VexOpArg* oerror = &argv[2]; // output error message
 	VEX_VexOpArg* output = &argv[3]; // output value
 
-	VEXint* statusValue = reinterpret_cast<VEXint*>(status->myArg);
+	auto statusValue = reinterpret_cast<VEXint<VEX_64>*>(status->myArg);
 	const char* infileValue = reinterpret_cast<const char*>(infile->myArg);
 	VEX_JSONInstanceStorage* storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
 

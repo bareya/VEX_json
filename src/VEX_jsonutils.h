@@ -70,6 +70,9 @@ struct VEX_JSONInstanceStorage final
 	/// Instance must be created on the heap only.
 	static VEX_JSONInstanceStorage* create();
 
+	VEX_JSONInstanceStorage(const VEX_JSONInstanceStorage&) = delete;
+	VEX_JSONInstanceStorage& operator=(const VEX_JSONInstanceStorage&) = delete;
+
 	~VEX_JSONInstanceStorage();
 
 	///
@@ -80,11 +83,6 @@ struct VEX_JSONInstanceStorage final
 private:
 	///
 	explicit VEX_JSONInstanceStorage(VEX_JSONStorage* storage);
-
-	/// @{ noncopyable
-	VEX_JSONInstanceStorage(const VEX_JSONInstanceStorage&) = delete;
-	VEX_JSONInstanceStorage& operator=(const VEX_JSONInstanceStorage&) = delete;
-	/// @}
 
 	VEX_JSONStorage* m_gStorage; ///< Cached pointer to global storage
 	tbb::concurrent_unordered_set<uint32> m_hashSet; ///<

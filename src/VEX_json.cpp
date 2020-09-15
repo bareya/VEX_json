@@ -7,6 +7,8 @@
 #include "VEX_jsontype.h"
 #include "VEX_jsonkeys.h"
 
+#include <vector>
+
 void newVEXOp(void*)
 {
 	std::vector<UT_StringHolder> value_defs =

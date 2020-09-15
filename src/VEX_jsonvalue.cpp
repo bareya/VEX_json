@@ -11,9 +11,9 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 	VEX_VexOpArg* output = &argv[3]; // output value
 
 	// some variables
-	VEXint* statusValue = reinterpret_cast<VEXint*>(status->myArg);
-	const char* infileValue = reinterpret_cast<const char*>(infile->myArg);
-	VEX_JSONInstanceStorage* storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
+	auto statusValue = reinterpret_cast<VEXint<VEX_64>*>(status->myArg);
+	auto infileValue = reinterpret_cast<const char*>(infile->myArg);
+	auto storage = reinterpret_cast<VEX_JSONInstanceStorage*>(data);
 
 	*statusValue = VEX_STATUS_SUCCESS;
 
@@ -44,7 +44,7 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 	{
 		case VEX_TYPE_INTEGER:
 		{
-			*statusValue = json_to_vex<VEXint,int64>::copy(*output, *value);
+			*statusValue = json_to_vex<VEXint<VEX_64>,int64>::copy(*output, *value);
 			if(!*statusValue){
 				oerror->myArg = VEX_SetString(*oerror, "Importing int value failed");
 			}
@@ -52,7 +52,7 @@ void VEX_jsonvalue::evaluate(int argc, VEX_VexOpArg argv[], void* data)
 		}
 		case VEX_TYPE_FLOAT:
 		{
-			*statusValue = json_to_vex<VEXfloat,fpreal64>::copy(*output, *value);
+			*statusValue = json_to_vex<VEXfloat<VEX_64>,fpreal64>::copy(*output, *value);
 			if(!*statusValue){
 				oerror->myArg = VEX_SetString(*oerror, "Importing float value failed");
 			}

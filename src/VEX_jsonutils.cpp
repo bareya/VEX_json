@@ -223,7 +223,7 @@ const UT_JSONValue* VEX_findJSONValue(const UT_JSONValue* inputValue, int argc, 
 		if(arg.myType == VEX_TYPE_INTEGER && value->getType() == UT_JSONValue::JSON_ARRAY)
 		{
 			const UT_JSONValueArray* jsonArray = value->getArray();
-			VEXint* idValue = reinterpret_cast<VEXint*>(arg.myArg);
+			auto idValue = reinterpret_cast<VEXint<VEX_64>*>(arg.myArg);
 
 			// data range check
 			if(*idValue >= 0 || *idValue < jsonArray->entries())
